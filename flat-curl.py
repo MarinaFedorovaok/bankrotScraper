@@ -18,6 +18,11 @@ while True:
         break
     print('You entered ', values[0], values [1])
 window.close() #end of window 1
+
+price = values[0]
+area = values[1]
+priceMetre = int(price)/float(area)
+
 def make_request_and_wirite_it_down(locationId):
     cookies = {
         'u': '2t4du0g6.qdwuhb.a5e8mudzyg80',
@@ -149,5 +154,7 @@ win.close()
 #display string in a popup         
 locationId = locations[value['board']]
 ######################################
-
-sg.popup('Средняя стоимость м2 = ' + str(round(make_request_and_wirite_it_down(locationId),2)))
+result1 = 'Средняя рыночная стоимость м2 = ' + str(round(make_request_and_wirite_it_down(locationId),2))
+result2 = 'Средняя стоимость  м2 покупаемой квартиры = ' + str(round(priceMetre))
+sg.popup(result1, result2)
+#sg.popup('Средняя стоимость м2 = ' + str(round(make_request_and_wirite_it_down(locationId),2)) + 'Средняя стоимость  м2 покупаемой квартиры = ' + str(priceMetre))
