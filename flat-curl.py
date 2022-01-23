@@ -79,6 +79,8 @@ def make_request_and_wirite_it_down(locationId):
     worksheet.write(row, 3, "стоимость м2")
     row += 1
 
+    totalPrice = 0
+    averagePrice =0
     for item in items:
         if item['type'] == 'item':
             value = item['value']
@@ -94,8 +96,13 @@ def make_request_and_wirite_it_down(locationId):
             worksheet.write(row, 1, float(area.replace(',','.')))
             worksheet.write(row, 2, int(price))
             worksheet.write(row, 3, '=C' + str(row +1) + '/B' + str(row +1))
+            totalPrice = totalPrice + int(price)
+            #print(totalPrice)
             row += 1
-    worksheet.write_formula(row, 3, '=AVERAGE(D' + str(2) + ':D' + str(row) + ')') 
+    worksheet.write_formula(row, 3, '=AVERAGE(D' + str(2) + ':D' + str(row) + ')')
+    averagePrice = totalPrice/row
+    print('Средняя стоимость квартиры:')
+    print (averagePrice)
     workbook.close()
 
 ###########################################
@@ -122,4 +129,4 @@ make_request_and_wirite_it_down(locationId)
 
 
 
-sg.popup('Suscess')
+sg.popup('Средняя стоимость м2 = ' + 'averagePrice')
