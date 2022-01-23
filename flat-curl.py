@@ -1,7 +1,6 @@
 import requests, json, sys, xlsxwriter
 import PySimpleGUI as sg
 
-
 def make_request_and_wirite_it_down(locationId):
     cookies = {
         'u': '2t4du0g6.qdwuhb.a5e8mudzyg80',
@@ -80,7 +79,9 @@ def make_request_and_wirite_it_down(locationId):
     row += 1
 
     totalPrice = 0
-    averagePrice =0
+    totalMeters = 0
+    averagePrice = 0
+
     for item in items:
         if item['type'] == 'item':
             value = item['value']
@@ -97,13 +98,16 @@ def make_request_and_wirite_it_down(locationId):
             worksheet.write(row, 2, int(price))
             worksheet.write(row, 3, '=C' + str(row +1) + '/B' + str(row +1))
             totalPrice = totalPrice + int(price)
+            totalMeters = totalMeters + float(area.replace(',','.'))
+            #print(totalMeters)
             #print(totalPrice)
             row += 1
     worksheet.write_formula(row, 3, '=AVERAGE(D' + str(2) + ':D' + str(row) + ')')
-    averagePrice = totalPrice/row
-    print('Средняя стоимость квартиры:')
+    averagePrice = totalPrice/totalMeters
+    print('Средняя стоимость m2:')
     print (averagePrice)
     workbook.close()
+    return averagePrice
 
 ###########################################
 ###                 GUI                 ###
@@ -124,9 +128,6 @@ win.close()
 
 #display string in a popup         
 locationId = locations[value['board']]
-make_request_and_wirite_it_down(locationId)
 ######################################
 
-
-
-sg.popup('Средняя стоимость м2 = ' + 'averagePrice')
+sg.popup('Средняя стоимость м2 = ' + str(make_request_and_wirite_it_down(locationId)))
