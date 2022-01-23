@@ -1,6 +1,23 @@
 import requests, json, sys, xlsxwriter
 import PySimpleGUI as sg
 
+
+sg.theme('DarkAmber')   # Add a touch of color
+# All the stuff inside your window.
+layout = [  [sg.Text('Введите данные Вашей квартиры')],
+            [sg.Text('Введите стоимость квартиры'), sg.InputText()],
+            [sg.Text('Введите площадь квартиры'), sg.InputText()],
+            [sg.Button('Ok'), sg.Button('Cancel')] ]
+
+# Create the Window
+window = sg.Window('Window Title', layout)
+# Event Loop to process "events" and get the "values" of the inputs
+while True:
+    event, values = window.read()
+    if event == sg.WIN_CLOSED or event == 'Cancel': # if user closes window or clicks cancel
+        break
+    print('You entered ', values[0], values [1])
+window.close() #end of window 1
 def make_request_and_wirite_it_down(locationId):
     cookies = {
         'u': '2t4du0g6.qdwuhb.a5e8mudzyg80',
