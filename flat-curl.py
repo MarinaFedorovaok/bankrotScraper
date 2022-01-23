@@ -78,9 +78,10 @@ def make_request_and_wirite_it_down(locationId):
     worksheet.write(row, 3, "стоимость м2")
     row += 1
 
-    totalPrice = 0
-    totalMeters = 0
     averagePrice = 0
+    priceMetre = 0
+    priceMetreSumm = 0
+    
 
     for item in items:
         if item['type'] == 'item':
@@ -97,13 +98,15 @@ def make_request_and_wirite_it_down(locationId):
             worksheet.write(row, 1, float(area.replace(',','.')))
             worksheet.write(row, 2, int(price))
             worksheet.write(row, 3, '=C' + str(row +1) + '/B' + str(row +1))
-            totalPrice = totalPrice + int(price)
-            totalMeters = totalMeters + float(area.replace(',','.'))
+            priceMetre = int(price)/float(area.replace(',','.'))
+            print(priceMetre)
+            priceMetreSumm = priceMetreSumm+priceMetre
+            #totalMeters = totalMeters + float(area.replace(',','.'))
             #print(totalMeters)
             #print(totalPrice)
             row += 1
     worksheet.write_formula(row, 3, '=AVERAGE(D' + str(2) + ':D' + str(row) + ')')
-    averagePrice = totalPrice/totalMeters
+    averagePrice = priceMetreSumm / row
     print('Средняя стоимость m2:')
     print (averagePrice)
     workbook.close()
@@ -130,4 +133,4 @@ win.close()
 locationId = locations[value['board']]
 ######################################
 
-sg.popup('Средняя стоимость м2 = ' + str(make_request_and_wirite_it_down(locationId)))
+sg.popup('Средняя стоимость м2 = ' + str(round(make_request_and_wirite_it_down(locationId),2)))
