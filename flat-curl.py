@@ -146,7 +146,8 @@ rooms_num = {'студия': '5695', '1 комната': '5696', '2 комнат
 #define layout
 layout = [[sg.Text('Регион:',size=(20, 1), font = 'Lucida',justification = 'left')],
         [sg.Combo(list(locations.keys()), default_value='СПб', key = 'location')],
-        [sg.Listbox(list(rooms_num.keys()), key = 'rooms_nums', size=(30, 7))],
+        [sg.Listbox(list(rooms_num.keys()), key = 'rooms_nums',\
+                    no_scrollbar = True, select_mode = sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(30, 7))],
         [sg.Button('OK', font = ('Times New Roman',12)), sg.Button('CANCEL', font = ('Times New Roman', 12))]]
 #Define Window
 win = sg.Window('avito-scraper',layout)
