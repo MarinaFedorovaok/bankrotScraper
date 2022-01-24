@@ -1,7 +1,7 @@
 import requests, json, sys, xlsxwriter
 import PySimpleGUI as sg
 
-
+""""
 sg.theme('DarkAmber')   # Add a touch of color
 # All the stuff inside your window.
 layout = [  [sg.Text('Введите данные Вашей квартиры')],
@@ -21,9 +21,10 @@ window.close() #end of window 1
 
 price = values[0]
 area = values[1]
-priceMetre = int(price)/float(area)
+"""
+priceMetre = 0#int(price)/float(area)
 
-def make_request_and_wirite_it_down(locationId):
+def make_request_and_wirite_it_down(locationId, rooms_nums_id):
     cookies = {
         'u': '2t4du0g6.qdwuhb.a5e8mudzyg80',
         'buyer_laas_location': '653240',
@@ -69,7 +70,8 @@ def make_request_and_wirite_it_down(locationId):
         ('params[201]', '1059'), # Тип сделки -- покупка, аренда -- 1060
         #('metroId[]', ['154', '2132', '155']),  # Станции меторо, нужно узнать какие коды какой станции соответствуют.
         ('categoryId', '24'),   # категория товаров 24 -- квариры, 14 -- автомобили
-        ('locationId', locationId), # регион,107621 -- СПб + ЛО, нужно еще раз проверить. 
+        ('locationId', locationId), # регион,107621 -- СПб + ЛО, нужно еще раз проверить.
+        ('params[549][]', rooms_nums_id), 
         ('priceMin', '1000000'),
         ('priceMax', '5000000'),
         #('context', 'H4sIAAAAAAAAA0u0MrSqLraysFJKK8rPDUhMT1WyLrYys1LKzMvJzANyagF-_ClVIgAAAA'), # некоторая загадочноя строке, которая была в оригинальном запросе, но без которой все работает
@@ -139,10 +141,12 @@ def make_request_and_wirite_it_down(locationId):
 ###########################################
 
 locations = {'СПб': '653240', 'СПб + Ло': '107621'}
+rooms_num = {'студия': '5695', '1 комната': '5696', '2 комнаты':'5697', '3 комнаты':'5698', '4 комнаты':'5699', '5 комнат':'5700', '6 комнат':'5701'}
 
 #define layout
 layout = [[sg.Text('Регион:',size=(20, 1), font = 'Lucida',justification = 'left')],
-        [sg.Combo(list(locations.keys()), default_value='СПб', key = 'board')],
+        [sg.Combo(list(locations.keys()), default_value='СПб', key = 'location')],
+        [sg.Listbox(list(rooms_num.keys()), key = 'rooms_nums', size=(30, 7))],
         [sg.Button('OK', font = ('Times New Roman',12)), sg.Button('CANCEL', font = ('Times New Roman', 12))]]
 #Define Window
 win = sg.Window('avito-scraper',layout)
@@ -152,9 +156,14 @@ event, value = win.read()
 win.close()
 
 #display string in a popup         
-locationId = locations[value['board']]
+locationId = locations[value['location']]
+print(value['rooms_nums'])
+
+rooms_nums_id = [] # выбираем из словаря индексы квартир по описанию
+for s in value['rooms_nums']:
+    rooms_nums_id.append(rooms_num[s])
 ######################################
-result1 = 'Средняя рыночная стоимость м2 = ' + str(round(make_request_and_wirite_it_down(locationId),2))
+result1 = 'Средняя рыночная стоимость м2 = ' + str(round(make_request_and_wirite_it_down(locationId, rooms_nums_id),2))
 result2 = 'Средняя стоимость  м2 покупаемой квартиры = ' + str(round(priceMetre))
-sg.popup(result1, result2)
-#sg.popup('Средняя стоимость м2 = ' + str(round(make_request_and_wirite_it_down(locationId),2)) + 'Средняя стоимость  м2 покупаемой квартиры = ' + str(priceMetre))
+sg.popup(result1 + '\n' + result2)
+
