@@ -1,12 +1,12 @@
 import requests, json, sys, xlsxwriter
 import PySimpleGUI as sg
 
-""""
+
 sg.theme('DarkAmber')   # Add a touch of color
 # All the stuff inside your window.
 layout = [  [sg.Text('Введите данные Вашей квартиры')],
             [sg.Text('Введите стоимость квартиры'), sg.InputText()],
-            [sg.Text('Введите площадь квартиры'), sg.InputText()],
+            [sg.Text('Введите площадь квартиры, м2'), sg.InputText()],
             [sg.Button('Ok'), sg.Button('Cancel')] ]
 
 # Create the Window
@@ -16,13 +16,12 @@ while True:
     event, values = window.read()
     if event == sg.WIN_CLOSED or event == 'Cancel': # if user closes window or clicks cancel
         break
-    print('You entered ', values[0], values [1])
+       
 window.close() #end of window 1
 
 price = values[0]
 area = values[1]
-"""
-priceMetre = 0#int(price)/float(area)
+priceMetre = int(price)/float(area)
 
 def make_request_and_wirite_it_down(locationId, rooms_nums_id):
     cookies = {
@@ -164,7 +163,10 @@ rooms_nums_id = [] # выбираем из словаря индексы ква�
 for s in value['rooms_nums']:
     rooms_nums_id.append(rooms_num[s])
 ######################################
-result1 = 'Средняя рыночная стоимость м2 = ' + str(round(make_request_and_wirite_it_down(locationId, rooms_nums_id),2))
-result2 = 'Средняя стоимость  м2 покупаемой квартиры = ' + str(round(priceMetre))
-sg.popup(result1 + '\n' + result2)
+middle_price = make_request_and_wirite_it_down(locationId, rooms_nums_id)
+profit_percent = (1-priceMetre/middle_price)*100
+result1 = 'Средняя рыночная стоимость м2 = ' + str(round(middle_price, 2))
+result2 = 'Средняя стоимость  м2 покупаемой квартиры = ' + str(round(priceMetre, 2))
+result3 = 'Доходность = ' + str(round(profit_percent, 2)) + '%'
+sg.popup(result1 + '\n' + result2 + '\n' + result3)
 
