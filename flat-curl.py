@@ -1,12 +1,16 @@
+from numpy import place
 import requests, json, sys, xlsxwriter
 import PySimpleGUI as sg
 import cookies as c
+from geopy.distance import distance
 
 sg.theme('DarkAmber')   # Add a touch of color
 # All the stuff inside your window.
 layout = [  [sg.Text('Введите данные Вашей квартиры')],
             [sg.Text('Введите стоимость квартиры'), sg.InputText()],
             [sg.Text('Введите площадь квартиры в формате: 31.5 м2' ), sg.InputText()],
+            [sg.Text('Введите координаты Вашей квартиры в формате: 60.021946, 30.258681'), sg.Input('')],
+            [sg.Text('Введите радиус поиска в формате: : 10'), sg.InputText()],
             [sg.Button('Ok'), sg.Button('Cancel')] ]
 
 # Create the Window
@@ -21,8 +25,17 @@ window.close() #end of window 1
 
 price = values[0]
 area = values[1]
+radius = values[3]
+place_text = values[2]
+place_middle = place_text.find(',')
+place_coord1 = place_text[:place_middle]
+place_coord2 = place_text[(place_middle+1):]
+
+
+print(place)
 priceMetre = int(price)/float(area)
 
+priceMetre = 1
 def make_request_and_wirite_it_down(locationId, rooms_nums_id):
     c.cookies
     c.headers 
@@ -65,9 +78,8 @@ def make_request_and_wirite_it_down(locationId, rooms_nums_id):
     row += 1
 
     averagePrice = 0
-    priceMetre = 0
+    # priceMetre = 0
     priceMetreSumm = 0
-    
 
     for item in items:
         if item['type'] == 'item':
@@ -78,19 +90,23 @@ def make_request_and_wirite_it_down(locationId, rooms_nums_id):
             area = splited_title[1] + splited_title[2]
             area = area.split('м')[0]
             price = value['price'].split('₽')[0].replace(' ','')
-            print(title,'\t',area,'\t', price)
-            sg.Print(title,'\t',area,'\t', price) #Debug Window
-            worksheet.write(row, 0, title)
-            worksheet.write(row, 1, float(area.replace(',','.')))
-            worksheet.write(row, 2, int(price))
-            worksheet.write(row, 3, '=C' + str(row +1) + '/B' + str(row +1))
-            priceMetre = int(price)/float(area.replace(',','.'))
-            print(priceMetre)
-            priceMetreSumm = priceMetreSumm+priceMetre
-            #totalMeters = totalMeters + float(area.replace(',','.'))
-            #print(totalMeters)
-            #print(totalPrice)
-            row += 1
+            coords = (float(value['coords']['lat']), float(value['coords']['lng']))
+            place = (float(place_coord1), float(place_coord2))
+            dist = distance(place, coords).km
+            if dist < int(radius):
+                print(title,'\t',area,'\t', price)
+                sg.Print(title,'\t',area,'\t', price) #Debug Window
+                worksheet.write(row, 0, title)
+                worksheet.write(row, 1, float(area.replace(',','.')))
+                worksheet.write(row, 2, int(price))
+                worksheet.write(row, 3, '=C' + str(row +1) + '/B' + str(row +1))
+                priceMetre = int(price)/float(area.replace(',','.'))
+                print(priceMetre)
+                priceMetreSumm = priceMetreSumm+priceMetre
+                # totalMeters = totalMeters + float(area.replace(',','.'))
+                # print(totalMeters)
+                #print(totalPrice)
+                row += 1
     worksheet.write_formula(row, 3, '=AVERAGE(D' + str(2) + ':D' + str(row) + ')')
     averagePrice = priceMetreSumm / row
     print('Средняя стоимость m2:')
@@ -102,8 +118,10 @@ def make_request_and_wirite_it_down(locationId, rooms_nums_id):
 ###                 GUI                 ###
 ###########################################
 # .Балашиха 2. Тюмень Екатеринбург Новосибирск Казань Воронеж г. Ростов-на-Дону
-locations = {'СПб': '653240', 'СПб + Ло': '107621', 'Самара': '653040', 'Калилинград': '630090'}
-rooms_num = {'студия': '5695', '1 комната': '5696', '2 комнаты':'5697', '3 комнаты':'5698', '4 комнаты':'5699', '5 комнат':'5700', '6 комнат':'5701'}
+locations = {'СПб': '653240', 'СПб + Ло': '107621', 'Самара': '653040',\
+     'Калилинград': '630090'}
+rooms_num = {'студия': '5695', '1 комната': '5696', '2 комнаты':'5697', \
+    '3 комнаты':'5698', '4 комнаты':'5699', '5 комнат':'5700', '6 комнат':'5701'}
 
 #define layout
 layout = [[sg.Text('Регион:',size=(20, 1), font = 'Lucida',justification = 'left')],
