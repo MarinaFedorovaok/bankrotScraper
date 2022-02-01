@@ -4,38 +4,6 @@ import PySimpleGUI as sg
 import cookies as c
 from geopy.distance import distance
 
-sg.theme('DarkAmber')   # Add a touch of color
-# All the stuff inside your window.
-layout = [  [sg.Text('Введите данные Вашей квартиры')],
-            [sg.Text('Введите стоимость квартиры'), sg.InputText()],
-            [sg.Text('Введите площадь квартиры в формате: 31.5 м2' ), sg.InputText()],
-            [sg.Text('Введите координаты Вашей квартиры в формате: 60.021946, 30.258681'), sg.Input('')],
-            [sg.Text('Введите радиус поиска в формате: : 10'), sg.InputText()],
-            [sg.Button('Ok'), sg.Button('Cancel')] ]
-
-# Create the Window
-window = sg.Window('Window Title', layout)
-# Event Loop to process "events" and get the "values" of the inputs
-while True:
-    event, values = window.read()
-    if event == sg.WIN_CLOSED or event == 'Cancel': # if user closes window or clicks cancel
-        break
-       
-window.close() #end of window 1
-
-price = values[0]
-area = values[1]
-radius = values[3]
-place_text = values[2]
-place_middle = place_text.find(',')
-place_coord1 = place_text[:place_middle]
-place_coord2 = place_text[(place_middle+1):]
-
-
-print(place)
-priceMetre = int(price)/float(area)
-
-priceMetre = 1
 def make_request_and_wirite_it_down(locationId, rooms_nums_id):
     c.cookies
     c.headers 
@@ -78,7 +46,6 @@ def make_request_and_wirite_it_down(locationId, rooms_nums_id):
     row += 1
 
     averagePrice = 0
-    # priceMetre = 0
     priceMetreSumm = 0
 
     for item in items:
@@ -118,34 +85,53 @@ def make_request_and_wirite_it_down(locationId, rooms_nums_id):
 ###                 GUI                 ###
 ###########################################
 # .Балашиха 2. Тюмень Екатеринбург Новосибирск Казань Воронеж г. Ростов-на-Дону
+
+
 locations = {'СПб': '653240', 'СПб + Ло': '107621', 'Самара': '653040',\
      'Калилинград': '630090'}
 rooms_num = {'студия': '5695', '1 комната': '5696', '2 комнаты':'5697', \
     '3 комнаты':'5698', '4 комнаты':'5699', '5 комнат':'5700', '6 комнат':'5701'}
 
 #define layout
-layout = [[sg.Text('Регион:',size=(20, 1), font = 'Lucida',justification = 'left')],
-        [sg.Combo(list(locations.keys()), default_value='СПб', key = 'location')],
-        [sg.Listbox(list(rooms_num.keys()), key = 'rooms_nums',\
+
+layout = [  [sg.Text('Введите данные Вашей квартиры')],
+            [sg.Text('Введите стоимость квартиры'), sg.InputText('1000000', key = 'price')],
+            [sg.Text('Введите площадь квартиры в формате: 31.5 м2' ), sg.InputText('31.5', key = 'area')],
+            [sg.Text('Введите координаты Вашей квартиры в формате: 60.021946, 30.258681'), sg.Input('60.021946, 30.258681', key = 'place_text')],
+            [sg.Text('Введите радиус поиска в формате: : 10'), sg.InputText('10', key = 'radius')],
+            [sg.Text('Регион:', size=(20, 1), font = 'Lucida',justification = 'left')],
+            [sg.Combo(list(locations.keys()), default_value='СПб', key = 'location')],
+            [sg.Listbox(list(rooms_num.keys()), key = 'rooms_nums',\
                     no_scrollbar = True, select_mode = sg.LISTBOX_SELECT_MODE_MULTIPLE, size=(30, 7))],
-        [sg.Button('OK', font = ('Times New Roman',12)), sg.Button('CANCEL', font = ('Times New Roman', 12))]]
+            [sg.Button('OK', font = ('Times New Roman',12)), sg.Button('CANCEL', font = ('Times New Roman', 12))]]
 #Define Window
 win = sg.Window('avito-scraper',layout)
 #Read  values entered by user
 event, value = win.read()
 #close first window
+
+price = value['price']
+area = value['area']
+place_text = value['place_text']
+radius = value['radius']
+place_middle = place_text.find(',')
+place_coord1 = place_text[:place_middle]
+place_coord2 = place_text[(place_middle+1):]
+
 win.close()
 
-#display string in a popup         
 locationId = locations[value['location']]
 print(value['rooms_nums'])
 
 rooms_nums_id = [] # выбираем из словаря индексы квартир по описанию
 for s in value['rooms_nums']:
     rooms_nums_id.append(rooms_num[s])
+
 ######################################
+
 middle_price = make_request_and_wirite_it_down(locationId, rooms_nums_id)
-profit_percent = (1-priceMetre/middle_price)*100
+priceMetre = int(price)/float(area)
+profit_percent = (middle_price/priceMetre - 1)*100
 result1 = 'Средняя рыночная стоимость м2 = ' + str(round(middle_price, 2))
 result2 = 'Средняя стоимость  м2 покупаемой квартиры = ' + str(round(priceMetre, 2))
 result3 = 'Доходность = ' + str(round(profit_percent, 2)) + '%'
